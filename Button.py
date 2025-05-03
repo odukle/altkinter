@@ -56,7 +56,7 @@ class CustomButton(tk.Canvas):
             x1, y1 + r,
             x1, y1
         ]
-        return self.create_polygon(points, smooth=True, splinesteps=36, **kwargs)
+        return self.create_polygon(points, smooth=True, splinesteps=100, **kwargs)
 
     def on_enter(self, event):
         self.itemconfig(self.bg_rect, fill=self.theme.hover)
