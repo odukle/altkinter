@@ -4,12 +4,14 @@ from Theme import Theme
 import threading
 import queue
 from ProgressBar import CustomProgressBar
+from ProgressWindow import *
+from tooltip import ToolTip
 
 class CustomTableView(tk.Frame):
     """A custom table view widget for displaying tabular data with support for themes and dataframes."""
 
-    def __init__(self, master, columns=None, data=None,
-                 row_height=10, column_width=100, truncate = None,
+    def __init__(self, master, columns=None, data=None, row_height=10,
+                 column_width=100, truncate = None, tooltip = 'on',
                  autofit_columns=False, autofit_rows = False,
                  theme=None, dataframe=None, text_alignment='left',
                  *args, **kwargs):
@@ -45,6 +47,8 @@ class CustomTableView(tk.Frame):
         self.render_queue = queue.Queue()
         self.text_alignment = text_alignment
         self.truncate = truncate
+        self.master = master
+        self.tooltip = tooltip
 
         if dataframe is not None:
             pass
@@ -94,7 +98,7 @@ class CustomTableView(tk.Frame):
 
     def _process_render_queue(self):
         """Process the render queue and update the UI."""
-        self.after(0,self.progress.grid)
+        pp = ProgressWindow(self.master)
         try:
             qsize = self.render_queue.qsize()
             rendered = 0
@@ -104,37 +108,50 @@ class CustomTableView(tk.Frame):
                     self.after(0, self._draw_header, index, data)
                 elif item_type == "row":
                     self.after(0, self._draw_row, index, data)
-                    self.after(0,self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+                    if rendered % 20 == 0:
+                        self.after(0, self.canvas.configure(scrollregion=self.canvas.bbox("all")))
                 rendered += 1
-                self.progress.set_progress(rendered/qsize)
+                pp.set_progress(rendered/qsize)
         except queue.Empty:
-            self.after(0,self.progress.grid_remove)
+            pp.close_progress()
+            self.after(0, self.canvas.configure(scrollregion=self.canvas.bbox("all")))
 
     def _draw_header(self, col_index, col_name):
         """Draw a single column header."""
         header_bg = self.theme.border
-        header_width = max([len(str(x[0])) for x in self.data]) if col_index == 0 else \
-            max([len(str(x[col_index])) for x in self.data]) if self.autofit_columns else self.column_width // 10
         header_value = col_name[:self.truncate] if self.truncate is not None else col_name
+      
+        if self.truncate is not None:
+            header_width = max([len(str(x[0])[:self.truncate]) for x in self.data]) if col_index == 0 else \
+                max([len(str(x[col_index])[:self.truncate]) for x in self.data]) if self.autofit_columns else self.column_width // 10
+        else:
+            header_width = max([len(str(x[0])) for x in self.data]) if col_index == 0 else \
+            max([len(str(x[col_index])) for x in self.data]) if self.autofit_columns else self.column_width // 10
+
         header = tk.Label(self.table_frame, text=header_value, bg=header_bg,
                           fg=self.theme.text, font=self.theme.font, justify=self.text_alignment,
                           width=header_width, height=1, padx=5, pady=5)
         header.grid(row=0, column=col_index, sticky='ew', padx=1, pady=1)
-
         header.bind("<Button-1>", lambda _, c=col_index: self._select_column(c))
+
+        if self.tooltip == 'on':
+            ToolTip(header, text=str(col_name), wraplength=300)
+        
 
     def _draw_row(self, row_index, row_data):
         """Draw a single row."""
         row_header_bg = self.theme.border
         row_height = max([x.count('\n') + 1 for x in row_data]) if self.autofit_rows else self.row_height // 10
-        row_values = [str(x)[:self.truncate] for x in row_data[0]] if self.truncate is not None else row_data[0]
-        row_header = tk.Label(self.table_frame, text=row_values, bg=row_header_bg,
+        row_values = [str(x)[:self.truncate] for x in row_data] if self.truncate is not None else row_data
+        row_header = tk.Label(self.table_frame, text=row_values[0], bg=row_header_bg,
                               fg=self.theme.text, font=self.theme.font, justify=self.text_alignment,
                               height=row_height, padx=5, pady=5)
         row_header.grid(row=row_index + 1, column=0, sticky="ew", padx=1, pady=1)
         row_header.bind("<Button-1>", lambda _, r=row_index: self._select_row(r))
+        if self.tooltip:
+            ToolTip(row_header,text=row_data[0], wraplength=300)
 
-        for col_index, cell_data in enumerate(row_data):
+        for col_index, cell_data in enumerate(row_values):
             if col_index == 0:
                 continue
             cell_bg = self.theme.widget_bg
@@ -146,6 +163,9 @@ class CustomTableView(tk.Frame):
             cell.bind("<Enter>", lambda e, r=row_index, c=col_index: self._on_cell_hover(e, r, c))
             cell.bind("<Leave>", lambda e, r=row_index, c=col_index: self._on_cell_leave(e, r, c))
             cell.bind("<Button-1>", lambda e, r=row_index, c=col_index: self._on_cell_click(e, r, c))
+
+            if self.tooltip == 'on':
+                ToolTip(cell, text=str(row_data[col_index]), wraplength=300)
 
     def _on_mousewheel(self, event):
         """Scroll the canvas on mouse wheel."""
@@ -279,15 +299,16 @@ if __name__ == "__main__":
     root.geometry("600x400")
 
     columns = [f'col {i}' for i in range(4)]
-    index  = [f'row {i}' for i in range(20)]
-    data = [[f'cell\n\n{c}' for c in columns] for i in index]
+    index  = [f'row {i}' for i in range(100)]
+    data = [[f'{c} veryveryveryveryveryveryBigSentence' for c in columns] for i in index]
     dataframe = pd.DataFrame(data, columns=columns, index=index)
 
     table = CustomTableView(root,
                             columns=columns,
                             dataframe=dataframe,
                             column_width=150,
-                            row_height=30,
+                            row_height=10,
+                            truncate=10,
                             theme=root.theme,
                             autofit_columns=True,
                             autofit_rows=False,
@@ -301,4 +322,4 @@ if __name__ == "__main__":
     show_button = CustomButton(root, text="Show Selected", command=show_selected)
     show_button.pack(pady=10)
 
-    root.mainloop() 
+    root.mainloop()
