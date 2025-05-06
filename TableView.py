@@ -300,18 +300,17 @@ if __name__ == "__main__":
 
     columns = [f'col {i}' for i in range(4)]
     index  = [f'row {i}' for i in range(100)]
-    data = [[f'{c} veryveryveryveryveryveryBigSentence' for c in columns] for i in index]
+    data = [[f'{c}_{i}' for c in columns] for i in index]
     dataframe = pd.DataFrame(data, columns=columns, index=index)
 
     table = CustomTableView(root,
-                            columns=columns,
+                            columns=columns,    
                             dataframe=dataframe,
                             column_width=150,
                             row_height=10,
-                            truncate=10,
                             theme=root.theme,
                             autofit_columns=True,
-                            autofit_rows=False,
+                            autofit_rows=True,
                             text_alignment='left')
     table.pack(fill="both", expand=True, padx=10, pady=10)
 
