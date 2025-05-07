@@ -79,13 +79,16 @@ class CanvasToolTip:
 
 
 class ToolTip:
-    def __init__(self, widget, text="widget info", wraplength=300, delay=250, **kwargs):
+    def __init__(self, widget, text="widget info", wraplength=300, delay=250,
+                 enter_binding = None, leave_binding = None,**kwargs):
         self.widget = widget
         self.text = text
         self.wraplength = wraplength
         self.toplevel = None
         self.delay = delay
         self.id = None
+        self.enter_binding = enter_binding
+        self.leave_binding = leave_binding
 
         kwargs["master"] = self.widget
         self.toplevel_kwargs = kwargs
@@ -95,9 +98,15 @@ class ToolTip:
         self.widget.bind("<Motion>", self.move_tip)
 
     def enter(self, event=None):
+        if self.enter_binding:
+            # call the enter binding function
+            self.enter_binding(event)
         self.schedule()
 
     def leave(self, event=None):
+        if self.leave_binding:
+            # call the leave binding function
+            self.leave_binding(event)
         self.unschedule()
         self.hide_tip()
 

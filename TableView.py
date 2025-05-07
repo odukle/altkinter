@@ -165,7 +165,9 @@ class CustomTableView(tk.Frame):
             cell.bind("<Button-1>", lambda e, r=row_index, c=col_index: self._on_cell_click(e, r, c))
 
             if self.tooltip == 'on':
-                ToolTip(cell, text=str(row_data[col_index]), wraplength=300)
+                ToolTip(cell, text=str(row_data[col_index]), wraplength=300,
+                        enter_binding=lambda e, r=row_index, c=col_index: self._on_cell_hover(e, r, c),
+                        leave_binding=lambda e, r=row_index, c=col_index: self._on_cell_leave(e, r, c))
 
     def _on_mousewheel(self, event):
         """Scroll the canvas on mouse wheel."""
@@ -294,7 +296,7 @@ if __name__ == "__main__":
     from Tk import Tk
     import pandas as pd
 
-    root = Tk(theme_mode="dark")
+    root = Tk(theme_mode="solarized-dark")
     root.title("Custom TableView Demo")
     root.geometry("600x400")
 
