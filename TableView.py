@@ -96,25 +96,38 @@ class CustomTableView(tk.Frame):
         for row_index, row_data in enumerate(self.data):
             self.render_queue.put(("row", row_index, row_data))
 
-    def _process_render_queue(self):
-        """Process the render queue and update the UI."""
+    def _process_render_queue(self, batch_size=50):
+        """Process the render queue and update the UI in batches."""
         pp = ProgressWindow(self.master)
-        try:
-            qsize = self.render_queue.qsize()
-            rendered = 0
-            while True:
-                item_type, index, data = self.render_queue.get_nowait()
-                if item_type == "header":
-                    self.after(0, self._draw_header, index, data)
-                elif item_type == "row":
-                    self.after(0, self._draw_row, index, data)
-                    if rendered % 20 == 0:
-                        self.after(0, self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-                rendered += 1
-                pp.set_progress(rendered/qsize)
-        except queue.Empty:
-            pp.close_progress()
-            self.after(0, self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+        total_items = self.render_queue.qsize()
+        rendered = 0
+
+        def process_batch():
+            nonlocal rendered
+            try:
+                for _ in range(batch_size):
+                    item_type, index, data = self.render_queue.get_nowait()
+                    if item_type == "header":
+                        self._draw_header(index, data)
+                    elif item_type == "row":
+                        self._draw_row(index, data)
+                    rendered += 1
+                    pp.set_progress(rendered / total_items)
+
+                # Update scrollregion after each batch
+                self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+                # Schedule the next batch if there are more items
+                if not self.render_queue.empty():
+                    self.after(10, process_batch)
+                else:
+                    pp.close_progress()
+            except queue.Empty:
+                pp.close_progress()
+                self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+        # Start processing the first batch
+        process_batch()
 
     def _draw_header(self, col_index, col_name):
         """Draw a single column header."""
@@ -200,46 +213,52 @@ class CustomTableView(tk.Frame):
         """Toggle selection of an entire row."""
         row_indices = {(row, col) for col in range(len(self.columns)) if col != 0}
         if row_indices.issubset(self.selected_indices):
+            # Deselect the row
             self.selected_indices -= row_indices
-            for col in range(len(self.columns)):
-                if col == 0: continue
+            for col in range(1, len(self.columns)):
                 widget = self.table_frame.grid_slaves(row=row + 1, column=col)[0]
                 widget.config(bg=self.theme.widget_bg)
         else:
+            # Select the row
             self.selected_indices |= row_indices
-            for col in range(len(self.columns)):
-                if col == 0: continue
+            for col in range(1, len(self.columns)):
                 widget = self.table_frame.grid_slaves(row=row + 1, column=col)[0]
                 widget.config(bg=self.theme.focus)
 
     def _select_column(self, col):
         """Toggle selection of an entire column."""
         col_indices = {(row, col) for row in range(len(self.data))}
-        
         if col_indices.issubset(self.selected_indices):
+            # Deselect the column
+            self.selected_indices -= col_indices
+            for row in range(len(self.data)):
+                widget = self.table_frame.grid_slaves(row=row + 1, column=col)[0]
+                widget.config(bg=self.theme.widget_bg)
+        else:
+            # Select the column
             if col == 0:
-                col_indices = {(row, c) for row in range(len(self.data)) for c in range(len(self.columns))}
-                self.selected_indices -= col_indices
-                for row in range(len(self.data)):
-                    for c in range(len(self.columns)):
-                        widget = self.table_frame.grid_slaves(row=row + 1, column=min(c+1,len(self.columns)-1))[0]
-                        widget.config(bg=self.theme.widget_bg)
-            else:
-                self.selected_indices -= col_indices
-                for row in range(len(self.data)):
+                self._select_all()
+                return
+            self.selected_indices |= col_indices
+            for row in range(len(self.data)):
+                widget = self.table_frame.grid_slaves(row=row + 1, column=col)[0]
+                widget.config(bg=self.theme.focus)
+
+    def _select_all(self):
+        """Toggle selection of all cells."""
+        all_indices = {(row, col) for row in range(len(self.data)) for col in range(1, len(self.columns))}
+        if all_indices.issubset(self.selected_indices):
+            # Deselect all cells
+            self.selected_indices.clear()
+            for row in range(len(self.data)):
+                for col in range(1, len(self.columns)):
                     widget = self.table_frame.grid_slaves(row=row + 1, column=col)[0]
                     widget.config(bg=self.theme.widget_bg)
         else:
-            if col == 0:
-                col_indices = {(row, c) for row in range(len(self.data)) for c in range(len(self.columns))}
-                self.selected_indices |= col_indices
-                for row in range(len(self.data)):
-                    for c in range(len(self.columns)):
-                        widget = self.table_frame.grid_slaves(row=row + 1, column=min(c+1,len(self.columns)-1))[0]
-                        widget.config(bg=self.theme.focus)
-            else:
-                self.selected_indices |= col_indices
-                for row in range(len(self.data)):
+            # Select all cells
+            self.selected_indices = all_indices
+            for row in range(len(self.data)):
+                for col in range(1, len(self.columns)):
                     widget = self.table_frame.grid_slaves(row=row + 1, column=col)[0]
                     widget.config(bg=self.theme.focus)
 
@@ -300,7 +319,7 @@ if __name__ == "__main__":
     root.title("Custom TableView Demo")
     root.geometry("600x400")
 
-    columns = [f'col {i}' for i in range(4)]
+    columns = [f'col {i}' for i in range(100)]
     index  = [f'row {i}' for i in range(100)]
     data = [[f'{c}_{i}' for c in columns] for i in index]
     dataframe = pd.DataFrame(data, columns=columns, index=index)
