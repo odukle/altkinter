@@ -19,18 +19,37 @@ class CustomListBox(tk.Frame):
         selectmode = "multiple" if multiselect else "browse"
         self.listbox = tk.Listbox(self, selectmode=selectmode, activestyle="none",
                                   bg=self.theme.widget_bg, fg=self.theme.text,
-                                  font=self.theme.font,listvariable=self.listvar,
+                                  font=self.theme.font, listvariable=self.listvar,
                                   highlightthickness=0, bd=0, relief="flat")
         self.listbox.pack(side="left", fill="both", expand=True)
-
-        # Add items to the Listbox
-        for item in self.items:
-            self.listbox.insert("end", item)
 
         # Custom Scrollbar
         self.scrollbar = CustomScrollbar(self, command=self.listbox.yview, theme=self.theme)
         self.scrollbar.pack(side="right", fill="y")
         self.listbox.configure(yscrollcommand=self.scrollbar.set)
+
+        # Bind hover events
+        self.listbox.bind("<Motion>", self.on_hover)
+        self.listbox.bind("<Leave>", self.on_leave)
+
+        # Track the last hovered index
+        self.last_hovered_index = None
+
+    def on_hover(self, event):
+        """Change the background of the item under the cursor."""
+        index = self.listbox.nearest(event.y)
+        if self.last_hovered_index is not None and self.last_hovered_index != index:
+            # Reset the background of the previously hovered item
+            self.listbox.itemconfig(self.last_hovered_index, bg=self.theme.widget_bg)
+        # Highlight the current item
+        self.listbox.itemconfig(index, bg=self.theme.hover)
+        self.last_hovered_index = index
+
+    def on_leave(self, event):
+        """Reset the background when the cursor leaves the Listbox."""
+        if self.last_hovered_index is not None:
+            self.listbox.itemconfig(self.last_hovered_index, bg=self.theme.widget_bg)
+            self.last_hovered_index = None
 
     def get_selected_items(self):
         """Return the selected items."""
