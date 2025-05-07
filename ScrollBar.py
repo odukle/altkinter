@@ -3,7 +3,7 @@ import tkinter as tk
 class CustomScrollbar(tk.Canvas):
     def __init__(self, master, orient="vertical", command=None, theme=None, **kwargs):
         super().__init__(master, highlightthickness=0,
-                        bg=(theme or master.theme).background, width=10 if orient == "vertical" else None,
+                        bg=(theme or master.theme).widget_bg, width=10 if orient == "vertical" else None,
                         height=None if orient == "vertical" else 10, **kwargs)
 
         self.theme = theme or master.theme
@@ -31,6 +31,8 @@ class CustomScrollbar(tk.Canvas):
             length = self.winfo_height()
             start = int(lo * length)
             end = int(hi * length)
+            if end - start < 10:  # Ensure minimum thumb size
+                end = start + 10
             self.thumb = self._draw_rounded_rect(
                 2, start, 8, end, r=4,
                 fill=self.theme.focus,
@@ -41,6 +43,8 @@ class CustomScrollbar(tk.Canvas):
             length = self.winfo_width()
             start = int(lo * length)
             end = int(hi * length)
+            if end - start < 5:  # Ensure minimum thumb size
+                end = start + 5
             self.thumb = self._draw_rounded_rect(
                 start, 2, end, 8, r=4,
                 fill=self.theme.focus,

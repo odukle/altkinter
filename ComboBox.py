@@ -5,7 +5,7 @@ from ListBox import CustomListBox
 
 class CustomComboBox(tk.Frame):
     def __init__(self, master, values=None, default=None, width=200, height=30,
-                 border_radius=10, theme=None,dropdown_height=150, **kwargs):
+                 border_radius=20, theme=None,dropdown_height=150, **kwargs):
         super().__init__(master, **kwargs)
         self.theme = theme or master.theme
         self.values = values or []
@@ -41,13 +41,10 @@ class CustomComboBox(tk.Frame):
             fill=self.theme.text, font=self.theme.font, anchor="w"
         )
 
-        # Add the dropdown arrow
-        arrow_size = 8
-        self.arrow_item = self.dropdown_button.create_polygon(
-            width - 15 - arrow_size // 2, height // 2 - arrow_size / 2,
-            width - 15 + arrow_size // 2, height // 2 - arrow_size / 2,
-            width - 15, height // 2 + 4,
-            fill=self.theme.text
+        # Add the dropdown arrow using text
+        self.arrow = self.dropdown_button.create_text(
+            self.width - 15, self.height // 2, text="˅",
+            fill=self.theme.text, font=self.theme.font, anchor="center"
         )
 
         # Bind the master window's configure event to update dropdown position
@@ -90,8 +87,9 @@ class CustomComboBox(tk.Frame):
         self.listbox = CustomListBox(self.dropdown_window, items=self.values, width=self.width,
                                      height=self.dropdown_height, theme=self.theme)
         self.listbox.pack(fill="both", expand=True)
-
         self.listbox.listbox.bind("<<ListboxSelect>>", self.on_select)
+
+        self.dropdown_button.itemconfig(self.arrow, text="˄")
 
     def place_dropdown(self):
         if self.dropdown_window is None or not self.dropdown_window.winfo_exists(): return
@@ -105,6 +103,7 @@ class CustomComboBox(tk.Frame):
         if self.dropdown_window:
             self.dropdown_window.destroy()
             self.dropdown_window = None
+            self.dropdown_button.itemconfig(self.arrow, text="˅")
 
     def on_select(self, event):
         """Handle selection from the dropdown menu."""
@@ -139,7 +138,7 @@ if __name__ == "__main__":
     def on_select():
         print("Selected Value:", combo.get())
 
-    values = [f"Option {i}" for i in range(1, 11)]
+    values = [f"Option {i}" for i in range(1, 10000)]
     combo = CustomComboBox(root, values=values, default="Option 1", theme=root.theme)
     combo.pack(pady=20)
 

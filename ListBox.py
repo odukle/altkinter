@@ -88,7 +88,7 @@ if __name__ == "__main__":
     root.title("Custom ListBox Demo")
     root.geometry("400x500+500+200")
 
-    items = [f"Item {i}" for i in range(1, 300)]
+    items = [f"Item {i}" for i in range(1, 10000)]
 
     listbox = CustomListBox(root, items=items, width=300, height=300, multiselect=True, theme=root.theme)
     listbox.pack(padx=20, pady=20)
