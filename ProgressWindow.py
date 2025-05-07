@@ -27,11 +27,11 @@ class ProgressWindow:
         # Add the progress bar to the popup
         self.popup_progress = CustomProgressBar(top, width=250, theme=master.theme)
         self.popup_progress.pack(pady=20)
-        self.top = top
+        self.window = top
 
     def set_progress(self, value):
         self.popup_progress.set_progress(value)
 
     def close_progress(self):
-        self.top.destroy()
+        self.window.destroy()
 

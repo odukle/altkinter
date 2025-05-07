@@ -6,7 +6,7 @@ class CustomListBox(tk.Frame):
     def __init__(self, master, items=None, width=300, height=200,
                  multiselect=False, theme=None, **kwargs):
         self.theme = theme or getattr(master, 'theme', Theme("dark"))
-        super().__init__(master, width=width, height=height, bg=self.theme.background, **kwargs)
+        super().__init__(master, width=width, height=height, bg=self.theme.widget_bg, **kwargs)
 
         self.items = items or []
         self.multiselect = multiselect
@@ -21,7 +21,7 @@ class CustomListBox(tk.Frame):
                                   bg=self.theme.widget_bg, fg=self.theme.text,
                                   font=self.theme.font, listvariable=self.listvar,
                                   highlightthickness=0, bd=0, relief="flat")
-        self.listbox.pack(side="left", fill="both", expand=True)
+        self.listbox.pack(side="left", fill="both", expand=True, padx=10, pady=5)
 
         # Custom Scrollbar
         self.scrollbar = CustomScrollbar(self, command=self.listbox.yview, theme=self.theme)

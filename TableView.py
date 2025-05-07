@@ -49,6 +49,7 @@ class CustomTableView(tk.Frame):
         self.truncate = truncate
         self.master = master
         self.tooltip = tooltip
+        self.progress_window = None
 
         if dataframe is not None:
             pass
@@ -71,16 +72,13 @@ class CustomTableView(tk.Frame):
         self.scrollvar_h = CustomScrollbar(self, orient="horizontal", command=self.canvas.xview, theme=self.theme)
         self.scrollvar_h.grid(row=1, column=0, sticky="ew")
         self.canvas.configure(xscrollcommand=self.scrollvar_h.set)
-        
-        self.progress = CustomProgressBar(self, width=200)
-        self.progress.grid(row=1, column=0, sticky="ew")
-        self.progress.grid_remove()
 
         self.table_frame = tk.Frame(self.canvas, bg=self.theme.background)
         self.table_window = self.canvas.create_window((0, 0), window=self.table_frame, anchor="nw")
 
         self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
         self.after_idle(self.after(50, self.build_table))
+        self.master.bind("<Configure>", self.on_master_move)
 
     def build_table(self):
         """Start rendering the table in a separate thread."""
@@ -98,33 +96,38 @@ class CustomTableView(tk.Frame):
 
     def _process_render_queue(self, batch_size=50):
         """Process the render queue and update the UI in batches."""
-        pp = ProgressWindow(self.master)
+        self.progress_window = ProgressWindow(self.master)
         total_items = self.render_queue.qsize()
         rendered = 0
 
         def process_batch():
             nonlocal rendered
-            try:
-                for _ in range(batch_size):
-                    item_type, index, data = self.render_queue.get_nowait()
-                    if item_type == "header":
-                        self._draw_header(index, data)
-                    elif item_type == "row":
-                        self._draw_row(index, data)
-                    rendered += 1
-                    pp.set_progress(rendered / total_items)
+            while not self.render_queue.empty():
+                try:
+                    for _ in range(batch_size):
+                        if self.render_queue.empty():
+                            self.progress_window.close_progress()
+                            self.progress_window = None
+                            break
+                        item_type, index, data = self.render_queue.get_nowait()
+                        if item_type == "header":
+                            self._draw_header(index, data)
+                        elif item_type == "row":
+                            self._draw_row(index, data)
+                        rendered += 1
+                        self.progress_window.set_progress(rendered / total_items)
 
-                # Update scrollregion after each batch
-                self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+                    # Update scrollregion after each batch
+                    self.after(10, lambda: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
 
-                # Schedule the next batch if there are more items
-                if not self.render_queue.empty():
-                    self.after(10, process_batch)
-                else:
-                    pp.close_progress()
-            except queue.Empty:
-                pp.close_progress()
-                self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+                    # Schedule the next batch if there are more items
+                    if not self.render_queue.empty():
+                        self.after(10, process_batch)
+                        return
+                except queue.Empty:
+                    self.after(10, lambda: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
+                    break
+                
 
         # Start processing the first batch
         process_batch()
@@ -311,6 +314,20 @@ class CustomTableView(tk.Frame):
         self.data = []
         self._draw_table()
 
+    def on_master_move(self, event):
+        """Update the position of the progress windoe when the master window moves."""
+        if not self.progress_window or not self.progress_window.window.winfo_exists(): return
+        self.progress_window.window.update_idletasks()
+        master_width = self.master.winfo_width()
+        master_height = self.master.winfo_height()
+        master_x = self.master.winfo_rootx()
+        master_y = self.master.winfo_rooty()
+        popup_width = 300
+        popup_height = 50
+        popup_x = master_x + (master_width - popup_width) // 2
+        popup_y = master_y + (master_height - popup_height) // 2
+        self.progress_window.window.geometry(f"{popup_width}x{popup_height}+{popup_x}+{popup_y}")
+        
 if __name__ == "__main__":
     from Tk import Tk
     import pandas as pd
@@ -319,9 +336,9 @@ if __name__ == "__main__":
     root.title("Custom TableView Demo")
     root.geometry("600x400")
 
-    columns = [f'col {i}' for i in range(100)]
+    columns = [f'col {i}' for i in range(10)]
     index  = [f'row {i}' for i in range(100)]
-    data = [[f'{c}_{i}' for c in columns] for i in index]
+    data = [[f'cell_{(r)*len(columns) + c+1}' for c in range(len(columns))] for r in range(len(index))]
     dataframe = pd.DataFrame(data, columns=columns, index=index)
 
     table = CustomTableView(root,

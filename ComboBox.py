@@ -5,7 +5,7 @@ from ListBox import CustomListBox
 
 class CustomComboBox(tk.Frame):
     def __init__(self, master, values=None, default=None, width=200, height=30,
-                 border_radius=10, theme=None, **kwargs):
+                 border_radius=10, theme=None,dropdown_height=150, **kwargs):
         super().__init__(master, **kwargs)
         self.theme = theme or master.theme
         self.values = values or []
@@ -14,6 +14,7 @@ class CustomComboBox(tk.Frame):
         self.height = height
         self.border_radius = border_radius
         self.dropdown_window = None
+        self.dropdown_height = dropdown_height
 
         # Configure the main frame
         self.configure(bg=self.theme.background)
@@ -49,6 +50,10 @@ class CustomComboBox(tk.Frame):
             fill=self.theme.text
         )
 
+        # Bind the master window's configure event to update dropdown position
+        self.master.bind("<Configure>", self.on_master_move)
+        self.bind('<FocusIn>', lambda e: self.hide_dropdown())
+
     def _create_rounded_rect(self, x1, y1, x2, y2, r, **kwargs):
         points = [
             x1 + r, y1,
@@ -79,21 +84,25 @@ class CustomComboBox(tk.Frame):
         self.dropdown_window.overrideredirect(True)
         self.dropdown_window.configure(bg=self.theme.background)
 
-        # Position the dropdown below the combo box
-        x = self.winfo_rootx()
-        y = self.winfo_rooty() + self.height
-        self.dropdown_window.geometry(f"{self.width}x{len(self.values) * 30}+{x}+{y}")
-
+        self.place_dropdown()
+        
         # Add the CustomListBox to the dropdown
         self.listbox = CustomListBox(self.dropdown_window, items=self.values, width=self.width,
-                                     height=len(self.values) * 30, theme=self.theme)
+                                     height=self.dropdown_height, theme=self.theme)
         self.listbox.pack(fill="both", expand=True)
 
         self.listbox.listbox.bind("<<ListboxSelect>>", self.on_select)
 
+    def place_dropdown(self):
+        if self.dropdown_window is None or not self.dropdown_window.winfo_exists(): return
+        """Place the dropdown menu below the combo box."""
+        x = self.winfo_rootx()
+        y = self.winfo_rooty() + self.height
+        self.dropdown_window.geometry(f"{self.width}x{self.dropdown_height}+{x}+{y}")
+
     def hide_dropdown(self):
         """Hide the dropdown menu."""
-        if self.dropdown_window and self.dropdown_window.winfo_exists():
+        if self.dropdown_window:
             self.dropdown_window.destroy()
             self.dropdown_window = None
 
@@ -114,6 +123,11 @@ class CustomComboBox(tk.Frame):
         if value in self.values:
             self.selected_value.set(value)
             self.dropdown_button.itemconfig(self.text_item, text=value)
+
+    def on_master_move(self, event):
+        """Update the position of the dropdown when the master window moves."""
+        if self.dropdown_window and self.dropdown_window.winfo_exists():
+            self.place_dropdown()
 
 if __name__ == "__main__":
     from Tk import Tk
