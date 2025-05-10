@@ -4,7 +4,7 @@ class Theme:
 
     def set_mode(self, mode):
         self.mode = mode
-        self.font = ("Helvetica", 10)
+        self.font = ("arial", 10)
         if mode == "dark":
             self.background = "#222222"
             self.widget_bg = "#2b2b2b"
@@ -13,7 +13,7 @@ class Theme:
             self.accent = "#4da6ff"
             self.border = "#3c3c3c"
             self.focus = "#5e5e5e"
-            self.text = "white"
+            self.text = "#ffffff"
             self.placeholder = "#777777"
         elif mode == "light":
             self.background = "#f0f0f0"
@@ -33,7 +33,7 @@ class Theme:
             self.accent = "#b58900"
             self.border = "#4a6a71"
             self.focus = "#56747b"
-            self.text = "white"
+            self.text = "#ffffff"
             self.placeholder = "#3c5055"
         elif mode == "solarized-light":
             self.background = "#fdf6e3"
