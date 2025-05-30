@@ -1,37 +1,48 @@
 import tkinter as tk
 from Theme import Theme 
 from Tk import Tk
+import cairo
+from PIL import Image, ImageTk
+from io import BytesIO
 
 class CustomCheckButton(tk.Canvas):
     def __init__(self, master, text="", command=None, variable=None,
-                 width=20, height=20, theme=None, **kwargs):
+                 size=20, theme=None, **kwargs):
 
         self.theme = theme or getattr(master, 'theme', Theme("dark"))
         parent_bg = master.cget("bg")
 
-        super().__init__(master, width=width + 150, height=height + 4,
+        super().__init__(master, width=size + 150, height=size + 4,
                          bg=parent_bg, highlightthickness=0, bd=0, **kwargs)
 
         self.command = command
         self.checked = variable if variable is not None else tk.BooleanVar(value=False)
+        self.box_width = size
+        self.box_height = size
+        self.box_radius = size/5
 
-        # Checkbox background
-        self.box = self.create_rectangle(2, 2, width, height,
-                                         outline=self.theme.border,
-                                         width=2,
-                                         fill=self.theme.widget_bg,
-                                         tags="box")
+        # Checkbox background (rounded, using cairo)
+        self.box_image = self._create_rounded_box_image(
+            size, size, self.box_radius,
+            border_color=self.theme.border,
+            bg_color=self.theme.widget_bg
+        )
+        self.box = self.create_image(2, 2, anchor="nw", image=self.box_image, tags="box")
 
         # Checkmark character (instead of line drawing)
-        self.check = self.create_text(width / 2, height / 2,
-                                      text="✔",
-                                      font=(self.theme.font[0], 12),
-                                      fill=self.theme.accent,
-                                      state="hidden",
-                                      tags="check")
+        # Place checkmark exactly at the center of the checkbox box
+        self.check = self.create_text(
+            self.box_width / 2 + 2,  # +2 for the box image offset
+            self.box_height / 2 + 2,
+            text="✅",
+            font=(self.theme.font[0], (size * 3) // 5),
+            fill=self.theme.accent,
+            state="hidden",
+            tags="check"
+        )
 
         # Label text
-        self.label = self.create_text(width + 10, height / 2,
+        self.label = self.create_text(size + 10, (size + 4) / 2,
                                       text=text,
                                       anchor="w",
                                       font=self.theme.font,
@@ -44,6 +55,41 @@ class CustomCheckButton(tk.Canvas):
         self.bind("<Button-1>", self.toggle)
 
         self.update_check()
+
+    def _create_rounded_box_image(self, width, height, radius, border_color, bg_color):
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+        ctx = cairo.Context(surface)
+
+        def hex_to_rgb(hex_color):
+            hex_color = hex_color.lstrip('#')
+            return tuple(int(hex_color[i:i+2], 16) / 255.0 for i in (0, 2, 4))
+
+        border_rgb = hex_to_rgb(border_color)
+        bg_rgb = hex_to_rgb(bg_color)
+
+        # Draw border
+        ctx.set_source_rgb(*border_rgb)
+        self._rounded_rect(ctx, 0, 0, width, height, radius)
+        ctx.fill()
+
+        # Draw background (inset for border)
+        ctx.set_source_rgb(*bg_rgb)
+        self._rounded_rect(ctx, 1, 1, width-2, height-2, max(1, radius-1))
+        ctx.fill()
+
+        buffer = BytesIO()
+        surface.write_to_png(buffer)
+        buffer.seek(0)
+        return ImageTk.PhotoImage(data=buffer.getvalue())
+
+    def _rounded_rect(self, ctx, x, y, w, h, r):
+        # Draw a rounded rectangle path on cairo context
+        ctx.new_sub_path()
+        ctx.arc(x + w - r, y + r, r, -0.5 * 3.1416, 0)
+        ctx.arc(x + w - r, y + h - r, r, 0, 0.5 * 3.1416)
+        ctx.arc(x + r, y + h - r, r, 0.5 * 3.1416, 3.1416)
+        ctx.arc(x + r, y + r, r, 3.1416, 1.5 * 3.1416)
+        ctx.close_path()
 
     def toggle(self, event=None):
         # Prevent double-calling due to overlapping tags
@@ -60,12 +106,23 @@ class CustomCheckButton(tk.Canvas):
         self.after(50, lambda: self.bind("<Button-1>", self.toggle))  # Rebind after brief delay
 
     def update_check(self):
+        # Update box image for checked/unchecked state
+        if self.checked.get():
+            fill = self.theme.active
+        else:
+            fill = self.theme.widget_bg
+
+        self.box_image = self._create_rounded_box_image(
+            self.box_width, self.box_height, self.box_radius,
+            border_color=self.theme.border,
+            bg_color=fill
+        )
+        self.itemconfig(self.box, image=self.box_image)
+
         if self.checked.get():
             self.itemconfig(self.check, state="normal")
-            self.itemconfig(self.box, fill=self.theme.active)
         else:
             self.itemconfig(self.check, state="hidden")
-            self.itemconfig(self.box, fill=self.theme.widget_bg)
 
 
 if __name__ == "__main__":

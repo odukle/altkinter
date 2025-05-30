@@ -2,8 +2,8 @@ import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
 from Theme import Theme
 from Tk import Tk
-from PIL import ImageFont
 import cairo
+from io import BytesIO
 
 class CustomButton(tk.Label):
     def __init__(self, master, text="", command=None, width=100, height=30,
@@ -72,23 +72,25 @@ class CustomButton(tk.Label):
 
         # Load the font
         context.select_font_face(font[0], cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-        context.set_font_size(font[1]*1.2)
+        context.set_font_size(font[1] * 1.2)
 
         # Calculate text position
         text_extents = context.text_extents(text)
         text_x = (width - text_extents.width) / 2 - text_extents.x_bearing
-        text_y = (height - text_extents.height) / 2 - text_extents.y_bearing*1.1
+        text_y = (height - text_extents.height) / 2 - text_extents.y_bearing * 1.1
 
         # Draw the text
         context.set_source_rgb(*text_rgb)
         context.move_to(text_x, text_y)
         context.show_text(text)
 
-        # Convert cairo surface to PIL image
-        surface.write_to_png("temp.png")
-        image = Image.open("temp.png")
+        # Save the cairo surface to a BytesIO object in PNG format
+        buffer = BytesIO()
+        surface.write_to_png(buffer)
+        buffer.seek(0)
 
-        return ImageTk.PhotoImage(image)
+        # Load the PNG data into a Tkinter-compatible image
+        return ImageTk.PhotoImage(data=buffer.getvalue())
 
 
     def on_enter(self, event):
@@ -139,7 +141,7 @@ class CustomButton(tk.Label):
 
 
 if __name__ == "__main__":
-    root = Tk(theme_mode="dark")
+    root = Tk(theme_mode="solarized-dark")
     root.title("Custom Button Demo")
     
     def on_button_click():
