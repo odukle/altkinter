@@ -8,8 +8,9 @@ from io import BytesIO
 class CustomButton(tk.Label):
     def __init__(self, master, text="", command=None, width=100, height=30,
                  border_radius=10, theme=None, **kwargs):
-
-        self.theme = theme or master.theme
+        
+        self.root = master.winfo_toplevel() if hasattr(master, 'winfo_toplevel') else master
+        self.theme = theme or self.root.theme if hasattr(self.root, 'theme') else Theme("light")
         parent_bg = master.cget("bg")
 
         self.width = width

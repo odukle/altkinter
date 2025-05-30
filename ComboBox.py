@@ -2,12 +2,14 @@ import tkinter as tk
 from tkinter import StringVar
 from theme import Theme
 from listbox import CustomListBox
+from altk import Toplevel
 
 class CustomComboBox(tk.Frame):
     def __init__(self, master, values=None, default=None, width=200, height=30,
                  border_radius=20, theme=None,dropdown_height=150, **kwargs):
         super().__init__(master, **kwargs)
-        self.theme = theme or master.theme
+        self.root = master.winfo_toplevel()
+        self.theme = theme or self.root.theme if hasattr(self.root, 'theme') else Theme("light")
         self.values = values or []
         self.selected_value = StringVar(value=default or (self.values[0] if self.values else ""))
         self.width = width
@@ -15,6 +17,7 @@ class CustomComboBox(tk.Frame):
         self.border_radius = border_radius
         self.dropdown_window = None
         self.dropdown_height = dropdown_height
+        
 
         # Configure the main frame
         self.configure(bg=self.theme.background)
@@ -48,7 +51,7 @@ class CustomComboBox(tk.Frame):
         )
 
         # Bind the master window's configure event to update dropdown position
-        self.master.bind("<Configure>", self.on_master_move)
+        self.root.bind("<Configure>", self.on_master_move)
         self.bind('<FocusIn>', lambda e: self.hide_dropdown())
 
     def _create_rounded_rect(self, x1, y1, x2, y2, r, **kwargs):
@@ -77,7 +80,7 @@ class CustomComboBox(tk.Frame):
 
     def show_dropdown(self):
         """Show the dropdown menu as a Toplevel window."""
-        self.dropdown_window = tk.Toplevel(self)
+        self.dropdown_window = Toplevel(self)
         self.dropdown_window.overrideredirect(True)
         self.dropdown_window.configure(bg=self.theme.background)
 

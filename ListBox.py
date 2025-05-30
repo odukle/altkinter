@@ -5,7 +5,10 @@ from theme import Theme
 class CustomListBox(tk.Frame):
     def __init__(self, master, items=None, width=300, height=200,
                  multiselect=False, theme=None, **kwargs):
-        self.theme = theme or getattr(master, 'theme', Theme("dark"))
+        
+        self.root = master.winfo_toplevel() if hasattr(master, 'winfo_toplevel') else master
+        self.theme = theme or self.root.theme if hasattr(self.root, 'theme') else Theme("light")
+
         super().__init__(master, width=width, height=height, bg=self.theme.widget_bg, **kwargs)
 
         self.items = items or []

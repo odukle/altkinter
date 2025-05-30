@@ -4,7 +4,7 @@ class Theme:
 
     def set_mode(self, mode):
         self.mode = mode
-        self.font = ("arial", 10)
+        self.font = ("Microsoft PhagsPa", 10)
         if mode == "dark":
             self.background = "#222222"
             self.widget_bg = "#2b2b2b"

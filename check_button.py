@@ -9,7 +9,8 @@ class CustomCheckButton(tk.Canvas):
     def __init__(self, master, text="", command=None, variable=None,
                  size=20, theme=None, **kwargs):
 
-        self.theme = theme or getattr(master, 'theme', Theme("dark"))
+        self.root = master.winfo_toplevel() if hasattr(master, 'winfo_toplevel') else master
+        self.theme = theme or self.root.theme if hasattr(self.root, 'theme') else Theme("light")
         parent_bg = master.cget("bg")
 
         super().__init__(master, width=size + 150, height=size + 4,
@@ -32,10 +33,10 @@ class CustomCheckButton(tk.Canvas):
         # Checkmark character (instead of line drawing)
         # Place checkmark exactly at the center of the checkbox box
         self.check = self.create_text(
-            self.box_width / 2 + 2,  # +2 for the box image offset
-            self.box_height / 2 + 2,
+            self.box_width / 2 + 1,
+            self.box_height / 2 + 1,
             text="✅",
-            font=(self.theme.font[0], (size * 3) // 5),
+            font=(self.theme.font[0], size - size // 3),
             fill=self.theme.accent,
             state="hidden",
             tags="check"

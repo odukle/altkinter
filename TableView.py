@@ -32,7 +32,9 @@ class CustomTableView(tk.Frame):
         colormap, container, cursor, height, highlightbackground,
         highlightcolor, highlightthickness, relief, takefocus, visual, width.
         """
-        self.theme = theme or getattr(master, 'theme', Theme("dark"))
+
+        self.root = master.winfo_toplevel() if hasattr(master, 'winfo_toplevel') else master
+        self.theme = theme or self.root.theme if hasattr(self.root, 'theme') else Theme("light")
         super().__init__(master, bg=self.theme.background, *args, **kwargs)
 
         self.columns = columns or []
@@ -76,9 +78,18 @@ class CustomTableView(tk.Frame):
         self.table_frame = tk.Frame(self.canvas, bg=self.theme.background)
         self.table_window = self.canvas.create_window((0, 0), window=self.table_frame, anchor="nw")
 
-        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+        # Bind mouse wheel only when mouse is over the canvas
+        self.canvas.bind("<Enter>", self._bind_mousewheel)
+        self.canvas.bind("<Leave>", self._unbind_mousewheel)
+
         self.after_idle(self.after(50, self.build_table))
         self.master.bind("<Configure>", self.on_master_move)
+
+    def _bind_mousewheel(self, event=None):
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
+    def _unbind_mousewheel(self, event=None):
+        self.canvas.unbind_all("<MouseWheel>")
 
     def build_table(self):
         """Start rendering the table in a separate thread."""

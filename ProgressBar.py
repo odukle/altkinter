@@ -1,10 +1,13 @@
 import tkinter as tk
 from altk import Tk
+from theme import Theme
 
 class CustomProgressBar(tk.Canvas):
     def __init__(self, master, width=200, height=10, progress=0.0,
                  bar_size=20, indeterminate=False, speed = 5, border_radius=10, theme=None, **kwargs):
-        self.theme = theme or master.theme
+        
+        self.root = master.winfo_toplevel() if hasattr(master, 'winfo_toplevel') else master
+        self.theme = theme or self.root.theme if hasattr(self.root, 'theme') else Theme("light")
         parent_bg = master.cget("bg")
         
         super().__init__(master, width=width, height=height,

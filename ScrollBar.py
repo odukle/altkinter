@@ -1,12 +1,16 @@
 import tkinter as tk
+from theme import Theme
 
 class CustomScrollbar(tk.Canvas):
     def __init__(self, master, orient="vertical", command=None, theme=None, **kwargs):
+
+        self.root = master.winfo_toplevel() if hasattr(master, 'winfo_toplevel') else master
+        self.theme = theme or self.root.theme if hasattr(self.root, 'theme') else Theme("light")
+
         super().__init__(master, highlightthickness=0,
-                        bg=(theme or master.theme).widget_bg, width=10 if orient == "vertical" else None,
+                        bg=(theme or self.theme).widget_bg, width=10 if orient == "vertical" else None,
                         height=None if orient == "vertical" else 10, **kwargs)
 
-        self.theme = theme or master.theme
         self.orient = orient
         self.command = command
         self.thumb = None

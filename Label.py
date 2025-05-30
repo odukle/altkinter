@@ -6,7 +6,8 @@ class CustomLabel(tk.Label):
     def __init__(self, master, text="", font_size=12, font_weight="normal",
                  anchor="center", wraplength=None, theme=None, **kwargs):
         
-        self.theme = theme or getattr(master, 'theme', Theme("dark"))
+        self.root = master.winfo_toplevel() if hasattr(master, 'winfo_toplevel') else master
+        self.theme = theme or self.root.theme if hasattr(self.root, 'theme') else Theme("light")
 
         font = (self.theme.font[0], font_size, font_weight)
         
