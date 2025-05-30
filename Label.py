@@ -1,6 +1,6 @@
 import tkinter as tk
-from Theme import Theme
-from Tk import Tk
+from theme import Theme
+from altk import Tk
 
 class CustomLabel(tk.Label):
     def __init__(self, master, text="", font_size=12, font_weight="normal",

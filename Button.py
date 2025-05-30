@@ -1,7 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
-from Theme import Theme
-from Tk import Tk
+from theme import Theme
+from altk import Tk
 import cairo
 from io import BytesIO
 
@@ -141,7 +141,7 @@ class CustomButton(tk.Label):
 
 
 if __name__ == "__main__":
-    root = Tk(theme_mode="solarized-dark")
+    root = Tk(theme_mode="dark")
     root.title("Custom Button Demo")
     
     def on_button_click():

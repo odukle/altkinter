@@ -1,4 +1,4 @@
-from ProgressBar import CustomProgressBar
+from progressbar import CustomProgressBar
 from tkinter import Toplevel
 
 class ProgressWindow:

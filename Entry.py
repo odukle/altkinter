@@ -1,5 +1,5 @@
 import tkinter as tk
-from Tk import Tk
+from altk import Tk
 
 class CustomEntry(tk.Canvas):
     def __init__(self, master, width=200, height=40, border_radius=20,

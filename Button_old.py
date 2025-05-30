@@ -1,6 +1,6 @@
 import tkinter as tk
 from Theme import Theme
-from Tk import Tk
+from altk import Tk
 
 class CustomButton(tk.Canvas):
     def __init__(self, master, text="", command=None, width=100, height=30,

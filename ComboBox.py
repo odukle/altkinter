@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import StringVar
-from Theme import Theme
-from ListBox import CustomListBox
+from theme import Theme
+from listbox import CustomListBox
 
 class CustomComboBox(tk.Frame):
     def __init__(self, master, values=None, default=None, width=200, height=30,
@@ -129,7 +129,7 @@ class CustomComboBox(tk.Frame):
             self.place_dropdown()
 
 if __name__ == "__main__":
-    from Tk import Tk
+    from altk import Tk
 
     root = Tk(theme_mode="dark")
     root.title("Custom ComboBox Demo")
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     combo = CustomComboBox(root, values=values, default="Option 1", theme=root.theme)
     combo.pack(pady=20)
 
-    from Button import CustomButton
+    from button import CustomButton
     select_button = CustomButton(root, text="Get Selected", command=on_select)
     select_button.pack(pady=10)
 

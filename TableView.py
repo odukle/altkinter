@@ -1,10 +1,10 @@
 import tkinter as tk
-from ScrollBar import CustomScrollbar
-from Theme import Theme
+from scrollbar import CustomScrollbar
+from theme import Theme
 import threading
 import queue
-from ProgressBar import CustomProgressBar
-from ProgressWindow import *
+from progressbar import CustomProgressBar
+from progress_window import *
 from tooltip import ToolTip
 
 class CustomTableView(tk.Frame):
@@ -329,7 +329,7 @@ class CustomTableView(tk.Frame):
         self.progress_window.window.geometry(f"{popup_width}x{popup_height}+{popup_x}+{popup_y}")
         
 if __name__ == "__main__":
-    from Tk import Tk
+    from altk import Tk
     import pandas as pd
 
     root = Tk(theme_mode="solarized-dark")
@@ -355,7 +355,7 @@ if __name__ == "__main__":
     def show_selected():
         print("Selected Indices:", table.get_selected_indices())
 
-    from Button import CustomButton
+    from button import CustomButton
     show_button = CustomButton(root, text="Show Selected", command=show_selected)
     show_button.pack(pady=10)
 

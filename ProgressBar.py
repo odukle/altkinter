@@ -1,5 +1,5 @@
 import tkinter as tk
-from Tk import Tk
+from altk import Tk
 
 class CustomProgressBar(tk.Canvas):
     def __init__(self, master, width=200, height=10, progress=0.0,
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         else:
             progressbar.stop_indeterminate()
 
-    from Button import CustomButton
+    from button import CustomButton
     indet_button = CustomButton(root, text="Toggle Indeterminate", command=toggle_indeterminate)
     indet_button.pack(pady=10)
 
