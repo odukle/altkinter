@@ -20,7 +20,12 @@ The following custom widgets are included in this project:
 - **CustomTableView**: A table view for displaying tabular data.
 
 ## Installation
-To run this project, ensure you have Python installed on your machine. You can clone this repository and install any required dependencies using pip.
+To run this project, ensure you have Python installed on your machine. 
+
+```bash
+pip install altkinter
+```
+Or, you can also clone this repository and install any required dependencies using pip.
 
 ```bash
 git clone <repository-url>
