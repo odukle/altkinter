@@ -1,5 +1,5 @@
 import tkinter as tk
-from theme import Theme
+from .theme import Theme
 from ctypes import windll, byref, sizeof, wintypes
 
 class Tk(tk.Tk):

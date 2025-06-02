@@ -1,6 +1,6 @@
 import tkinter as tk
-from theme import Theme 
-from altk import Tk
+from .theme import Theme 
+from .altk import Tk
 import cairo
 from PIL import Image, ImageTk
 from io import BytesIO

@@ -5,16 +5,16 @@ parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(parent_dir)
 
 import tkinter as tk
-from altk import Tk, Frame
-from button import CustomButton
-from label import CustomLabel
-from entry import CustomEntry
-from progressbar import CustomProgressBar
-from listbox import CustomListBox
-from combobox import CustomComboBox
-from check_button import CustomCheckButton
-from scrollbar import CustomScrollbar
-from tableview import CustomTableView
+from altkinter.altk import Tk, Frame
+from altkinter.button import CustomButton
+from altkinter.label import CustomLabel
+from altkinter.entry import CustomEntry
+from altkinter.progressbar import CustomProgressBar
+from altkinter.listbox import CustomListBox
+from altkinter.combobox import CustomComboBox
+from altkinter.check_button import CustomCheckButton
+from altkinter.scrollbar import CustomScrollbar
+from altkinter.tableview import CustomTableView
 
 class SampleApp:
     def __init__(self, master):

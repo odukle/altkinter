@@ -1,5 +1,5 @@
 import tkinter as tk
-from theme import Theme
+from .theme import Theme
 
 class CustomScrollbar(tk.Canvas):
     def __init__(self, master, orient="vertical", command=None, theme=None, **kwargs):

@@ -1,6 +1,6 @@
 import tkinter as tk
-from scrollbar import CustomScrollbar
-from theme import Theme
+from .scrollbar import CustomScrollbar
+from .theme import Theme
 
 class CustomListBox(tk.Frame):
     def __init__(self, master, items=None, width=300, height=200,
@@ -85,7 +85,7 @@ class CustomListBox(tk.Frame):
 
 
 if __name__ == "__main__":
-    from altk import Tk
+    from .altk import Tk
 
     root = Tk(theme_mode="dark")
     root.title("Custom ListBox Demo")
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     def show_selected():
         print("Selected:", listbox.get_selected_items())
 
-    from button import CustomButton
+    from .button import CustomButton
     button = CustomButton(root, text="Get Selected Items", command=show_selected, width=150)
     button.pack(pady=10)
 

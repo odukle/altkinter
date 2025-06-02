@@ -1,7 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
-from theme import Theme
-from altk import Tk
+from .theme import Theme
+from .altk import Tk
 import cairo
 from io import BytesIO
 

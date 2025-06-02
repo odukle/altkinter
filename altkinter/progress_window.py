@@ -1,6 +1,6 @@
-from progressbar import CustomProgressBar
+from .progressbar import CustomProgressBar
 from tkinter import Toplevel
-from theme import Theme
+from .theme import Theme
 
 class ProgressWindow:
     def __init__(self, master):
