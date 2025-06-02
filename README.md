@@ -24,7 +24,7 @@ To run this project, ensure you have Python installed on your machine. You can c
 
 ```bash
 git clone <repository-url>
-cd sample-gui
+cd altkinter
 pip install -r requirements.txt
 ```
 
