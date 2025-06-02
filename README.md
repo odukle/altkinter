@@ -1,7 +1,7 @@
-# Sample GUI Project
+# ALTKINTER
 
 ## Overview
-This project is a graphical user interface (GUI) application that showcases a variety of custom widgets built using the `tkinter` library. The application demonstrates the use of custom components such as buttons, labels, entry fields, list boxes, combo boxes, check buttons, progress bars, scrollbars, and table views.
+This project contains variety of custom widgets built using the `tkinter` library. The sample-gui demonstrates the use of custom components such as buttons, labels, entry fields, list boxes, combo boxes, check buttons, progress bars, scrollbars, and table views.
 
 ## Custom Widgets
 The following custom widgets are included in this project:
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-To start the application, run the `main.py` file:
+To start sample-gui application, run the `main.py` file:
 
 ```bash
 python main.py
