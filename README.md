@@ -3,7 +3,7 @@
 ## Overview
 This project contains variety of custom widgets built using the `tkinter` library. The sample-gui demonstrates the use of custom components such as buttons, labels, entry fields, list boxes, combo boxes, check buttons, progress bars, scrollbars, and table views.
 
-![sample-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/f5f06397-8aee-4b25-8188-5b4e99d481ea)
+![sample-ezgif com-video-to-gif-converter (1)](https://github.com/user-attachments/assets/efb85b5c-f1be-483e-9176-19c87c2eaab3)
 
 
 ## Custom Widgets
